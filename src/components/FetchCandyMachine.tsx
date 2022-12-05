@@ -1,83 +1,86 @@
-import { useConnection } from "@solana/wallet-adapter-react"
-import { PublicKey } from "@solana/web3.js"
-import { Metaplex } from "@metaplex-foundation/js"
-import { FC, useEffect, useState } from "react"
-import styles from "../styles/custom.module.css"
+
+import { useConnection } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
+import { Metaplex } from "@metaplex-foundation/js";
+import { FC, useEffect, useState } from "react";
+import styles from "../styles/custom.module.css";
 
 export const FetchCandyMachine: FC = () => {
   const [candyMachineAddress, setCandyMachineAddress] = useState(
-    "9tQLFyLeaUwQ1PN2YDiFztZDxu4KT6px8CBYEapkshAD"
-  )
-  const [candyMachineData, setCandyMachineData] = useState(null)
-  const [pageItems, setPageItems] = useState(null)
-  const [page, setPage] = useState(1)
+    "E4ebSsto3aEeEFCii46knQyHaZhLhnzzBMY5WgjECn2"
+  );
+  const [candyMachineData, setCandyMachineData] = useState(null);
+  const [pageItems, setPageItems] = useState(null);
+  const [page, setPage] = useState(1);
 
-  const { connection } = useConnection()
-  const metaplex = Metaplex.make(connection)
+  const { connection } = useConnection();
+  const metaplex = Metaplex.make(connection);
 
-  // fetch candymachine by address
   const fetchCandyMachine = async () => {
-    // reset page to 1
-    setPage(1)
+    // Set page to 1 - We want to be at the first page we fetch a Candy Machine instance
+    setPage(1);
 
-    // fetch candymachine data
+    // Fetch candy machine data
     try {
       const candyMachine = await metaplex
         .candyMachines()
         .findByAddress({ address: new PublicKey(candyMachineAddress) })
         .run()
 
-      setCandyMachineData(candyMachine)
-    } catch (e) {
-      alert("Please submit a valid CMv2 address.")
-    }
-  }
 
-  // paging
+      setCandyMachineData(candyMachine);
+    } catch (error) {
+      alert("Please submit a valid CMv2 address");
+
+    }
+  };
+
+  // Paging
   const getPage = async (page, perPage) => {
     const pageItems = candyMachineData.items.slice(
       (page - 1) * perPage,
       page * perPage
-    )
+    );
 
-    // fetch metadata of NFTs for page
-    let nftData = []
+    // Fetch metadata of NFTs for page
+    let nftData = [];
     for (let i = 0; i < pageItems.length; i++) {
-      let fetchResult = await fetch(pageItems[i].uri)
-      let json = await fetchResult.json()
-      nftData.push(json)
+      let fetchResult = await fetch(pageItems[i].uri);
+      let json = await fetchResult.json();
+      nftData.push(json);
+      console.log("NFT METADATA:", json);
     }
 
-    // set state
-    setPageItems(nftData)
-  }
+    setPageItems(nftData);
+  };
 
-  // previous page
+  // Previous page
   const prev = async () => {
     if (page - 1 < 1) {
-      setPage(1)
+      setPage(1);
     } else {
-      setPage(page - 1)
+      setPage(page - 1);
     }
-  }
+  };
 
-  // next page
+  // Next page
   const next = async () => {
-    setPage(page + 1)
-  }
+    setPage(page + 1);
+  };
 
-  // fetch placeholder candy machine on load
+  // Fetch placeholder candy machine on load
   useEffect(() => {
-    fetchCandyMachine()
-  }, [])
+    fetchCandyMachine();
+  }, []);
 
-  // fetch metadata for NFTs when page or candy machine changes
+  // Fetch metadata for NFTs when page or candy machine changes
   useEffect(() => {
     if (!candyMachineData) {
-      return
+      return;
     }
-    getPage(page, 9)
-  }, [candyMachineData, page])
+
+    getPage(page, 9);
+  }, [candyMachineData, page]);
 
   return (
     <div>
@@ -125,5 +128,5 @@ export const FetchCandyMachine: FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};

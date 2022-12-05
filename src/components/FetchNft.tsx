@@ -1,48 +1,45 @@
-import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-import { Metaplex, walletAdapterIdentity } from "@metaplex-foundation/js"
-import { FC, useEffect, useState } from "react"
-import styles from "../styles/custom.module.css"
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { Metaplex, walletAdapterIdentity } from "@metaplex-foundation/js";
+import { FC, useEffect, useState } from "react";
+import styles from "../styles/custom.module.css";
 
 export const FetchNft: FC = () => {
-  const [nftData, setNftData] = useState(null)
+  const [nftData, setNftData] = useState(null);
 
-  const { connection } = useConnection()
-  const wallet = useWallet()
-  const metaplex = Metaplex.make(connection).use(walletAdapterIdentity(wallet))
+  const { connection } = useConnection();
+  const wallet = useWallet();
+  const metaplex = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
 
-  // fetch nfts
   const fetchNfts = async () => {
     if (!wallet.connected) {
-      return
+      return;
     }
 
     // fetch NFTs for connected wallet
     const nfts = await metaplex
       .nfts()
-      .findAllByOwner({ owner: wallet.publicKey })
-      .run()
+      .findAllByOwner({ owner: wallet.publicKey });
 
-    // fetch off chain metadata for each NFT
-    let nftData = []
-    for (let i = 0; i < nfts.length; i++) {
-      let fetchResult = await fetch(nfts[i].uri)
-      let json = await fetchResult.json()
-      nftData.push(json)
+    // Fetch off chain metadata for each NFT
+    let nftData = [];
+    for (let i = 0; i < nfts.getResult.length; i++) {
+      let fetchResult = await fetch(nfts[i].uri);
+      let json = await fetchResult.json();
+      console.log("NFT METADATA:", json);
+      nftData.push(json);
     }
 
-    // set state
-    setNftData(nftData)
-  }
+    setNftData(nftData);
+  };
 
-  // fetch nfts when connected wallet changes
   useEffect(() => {
-    fetchNfts()
-  }, [wallet])
+    fetchNfts();
+  }, [wallet]);
 
   return (
     <div>
       {nftData && (
-        <div className={styles.gridNFT}>
+        <div className={styles.gridNft}>
           {nftData.map((nft) => (
             <div>
               <ul>{nft.name}</ul>
@@ -52,5 +49,5 @@ export const FetchNft: FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
